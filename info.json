@@ -5,7 +5,7 @@
   "author": "Klonan, garrotte",
   "contact": "",
   "homepage": "",
-  "description": "Adds nerfed spidertrones with hidden cheating construction bots",
+  "description": "Adds nerfed spidertrones with hidden construction bots",
   "dependencies": [
     "base >= 1.1.5",
     "(?)alien-biomes",
