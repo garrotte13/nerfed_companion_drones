@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 2022-02-05
+  Changes:
+      - Removed weapons, make spidertrone slower, with less health&resistances, reduced zone of smart job search, etc. Only one roboport is left for it.
+      - Turned off auto re-fuel, and fuel sorting
+---------------------------------------------------------------------------------------------------
 Version: 1.0.22
 Date: 2021-12-02
   Changes:

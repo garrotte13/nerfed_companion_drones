@@ -1,11 +1,11 @@
 {
-  "name": "Companion_Drones",
-  "version": "1.0.22",
-  "title": "Companion Drones",
-  "author": "Klonan",
+  "name": "Nerfed_Companion_Drones",
+  "version": "1.1.0",
+  "title": "Nerfed Companion Drones",
+  "author": "Klonan, garrotte",
   "contact": "",
   "homepage": "",
-  "description": "Adds friends",
+  "description": "Adds nerfed spidertrones with hidden cheating construction bots",
   "dependencies": [
     "base >= 1.1.5",
     "(?)alien-biomes",
