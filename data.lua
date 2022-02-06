@@ -60,7 +60,7 @@ local bot_item =
   name = "companion-construction-robot",
   icon = "__Companion_Drones__/drone-icon.png",
   icon_size = 200,
-  subgroup = "logistic-network",
+  subgroup = "companion",
   order = "a[robot]-b[construction-robot]",
   place_result = "companion-construction-robot",
   stack_size = 500,
@@ -100,7 +100,7 @@ local equipment =
   spawn_minimum = "0W",
 
   robot_limit = 6,
-  construction_radius = 10,
+  construction_radius = 7,
   draw_construction_radius_visualization = false,
   spawn_and_station_height = 1,
   spawn_and_station_shadow_height_offset = 0,
@@ -132,7 +132,7 @@ local item_category =
 {
   type = "item-subgroup",
   name = "companion",
-  group = "combat",
+  group = "logistics",
   order = "dea-hank"
 }
 
@@ -222,7 +222,7 @@ local drone =
   mined_sound = {filename = "__core__/sound/deconstruct-large.ogg",volume = 0.8},
   open_sound = { filename = "__base__/sound/spidertron/spidertron-door-open.ogg", volume= 0.35 },
   close_sound = { filename = "__base__/sound/spidertron/spidertron-door-close.ogg", volume = 0.4 },
-  sound_minimum_speed = 0.3,
+  sound_minimum_speed = 0.2,
   sound_scaling_ratio = 0.1,
   allow_passengers = false,
   working_sound =
@@ -250,56 +250,56 @@ local drone =
   flags = {"placeable-neutral", "player-creation", "placeable-off-grid"},
   collision_mask = {},
   minable = {result = "companion", mining_time = 1},
-  max_health = 250,
+  max_health = 120,
   resistances =
   {
     {
       type = "fire",
-      decrease = 15,
+      decrease = 2,
       percent = 60
     },
     {
       type = "physical",
-      decrease = 15,
-      percent = 60
+      decrease = 1,
+      percent = 20
     },
     {
       type = "impact",
-      decrease = 50,
-      percent = 80
+      decrease = 10,
+      percent = 30
     },
     {
       type = "explosion",
-      decrease = 20,
-      percent = 75
+      decrease = 2,
+      percent = 15
     },
     {
       type = "acid",
       decrease = 0,
-      percent = 70
+      percent = 15
     },
     {
       type = "laser",
       decrease = 0,
-      percent = 70
+      percent = 10
     },
     {
       type = "electric",
       decrease = 0,
-      percent = 70
+      percent = 10
     }
   },
   --corpse = "spidertron-remnants",
   --dying_explosion = "spidertron-explosion",
   energy_per_hit_point = 1,
   guns = {},
-  inventory_size = 21,
+  inventory_size = 11,
   equipment_grid = "companion-equipment-grid",
   trash_inventory_size = 0,
   height = 2,
   torso_rotation_speed = 0.05,
-  chunk_exploration_radius = 3,
-  selection_priority = 45,
+  chunk_exploration_radius = 1,
+  selection_priority = 35,
   graphics_set = spidertron_torso_graphics_set(0.6),
   base_render_layer = "smoke",
   render_layer = "air-object",
@@ -308,7 +308,7 @@ local drone =
     type = "burner",
     fuel_category = "chemical",
     effectivity = 1,
-    fuel_inventory_size = 3,
+    fuel_inventory_size = 2,
     smoke =
     {
       {
@@ -325,7 +325,7 @@ local drone =
       }
     }
   },
-  movement_energy_consumption = "20kW",
+  movement_energy_consumption = "75kW",
   automatic_weapon_cycling = true,
   chain_shooting_cooldown_modifier = 0.5,
   spider_engine =
@@ -586,7 +586,7 @@ local companion_grid =
 {
   type = "equipment-grid",
   name = "companion-equipment-grid",
-  width = 10,
+  width = 2,
   height = 2,
   equipment_categories = {"companion"}
 }
@@ -760,10 +760,10 @@ local recipes =
     },
     result = "companion"
   },
-  {
+  --[[{
     type = "recipe",
     name = "companion-reactor-equipment",
-    enabled = true,
+    enabled = false,
     energy_required = 10,
     ingredients =
     {
@@ -775,7 +775,7 @@ local recipes =
   {
     type = "recipe",
     name = "companion-shield-equipment",
-    enabled = true,
+    enabled = false,
     energy_required = 10,
     ingredients =
     {
@@ -784,6 +784,7 @@ local recipes =
     },
     result = "companion-shield-equipment"
   },
+  --]]
   {
     type = "recipe",
     name = "companion-roboport-equipment",
@@ -795,11 +796,11 @@ local recipes =
       {"iron-stick", 20}
     },
     result = "companion-roboport-equipment"
-  },
-  {
+  }
+  --[[{
     type = "recipe",
     name = "companion-defense-equipment",
-    enabled = true,
+    enabled = false,
     energy_required = 10,
     ingredients =
     {
@@ -808,6 +809,7 @@ local recipes =
     },
     result = "companion-defense-equipment"
   }
+  --]]
 }
 
 data:extend(recipes)
@@ -907,19 +909,19 @@ data:extend
   drone,
   drone_item,
   leg,
-  gun,
-  gun_item,
-  plasma_projectile,
+  -- gun,
+  -- gun_item,
+  -- plasma_projectile,
   companion_grid,
-  shield,
-  shield_item,
+  -- shield,
+  -- shield_item,
   --battery,
   --battery_item,
-  reactor,
-  reactor_item,
+  -- reactor,
+  -- reactor_item,
   category,
   speed_sticker,
-  attack_shortcut,
+  -- attack_shortcut,
   construct_shortcut
 
 }

@@ -1,10 +1,10 @@
 local util = require("util")
-local follow_range = 12
+local follow_range = 10
 local companion_update_interval = 17
 local base_speed = 0.25
 local build_speed = 0.30
 local sticker_life = 100
-local max_distance = 250  -- The maximum distance at which the drones "detect" jobs
+local max_distance = 10  -- The maximum distance at which the drones "detect" jobs
 
 local script_data =
 {
@@ -37,7 +37,7 @@ local get_fuel_items = function()
   fuel_items = {}
   for k, item in pairs (game.item_prototypes) do
     if item.fuel_value > 0 and item.fuel_category == "chemical" then
-      table.insert(fuel_items, {name = item.name, count = 1, fuel_top_speed_multiplier = item.fuel_top_speed_multiplier})
+      table.insert(fuel_items, {name = item.name, count = 1, fuel_top_speed_multiplier = item.stack_size, stack_size= item.stack_size})
     end
   end
 
@@ -83,8 +83,9 @@ end
 
 local get_speed_boost = function(burner)
   local burning = burner.currently_burning
-  if not burning then return 1 end
-  return burning.fuel_top_speed_multiplier
+  if not burning then return 0.01 end
+  return 1
+  --return burning.fuel_top_speed_multiplier
 end
 
 local rotate_vector = function(vector, orientation)
@@ -99,13 +100,13 @@ local rotate_vector = function(vector, orientation)
 end
 
 local get_player_speed = function(player, boost)
-  local boost = boost or 1.0
+  local boost1 = boost or 1.0
   if player.vehicle then
-    return math.abs(player.vehicle.speed) * boost
+    return math.abs(player.vehicle.speed) * boost1
   end
 
   if player.character then
-    return player.character_running_speed * boost
+    return player.character_running_speed * boost1
   end
 
   return 0.3
@@ -184,8 +185,8 @@ Companion.new = function(entity, player)
       last_attack_search_offset = 0
     }
     script_data.player_data[player.index] = player_data
-    player.set_shortcut_available("companion-attack-toggle", true)
-    player.set_shortcut_toggled("companion-attack-toggle", true)
+    -- player.set_shortcut_available("companion-attack-toggle", true)
+    -- player.set_shortcut_toggled("companion-attack-toggle", true)
     player.set_shortcut_available("companion-construction-toggle", true)
     player.set_shortcut_toggled("companion-construction-toggle", true)
   end
@@ -206,22 +207,22 @@ Companion.new = function(entity, player)
   script_data.companions[entity.unit_number] = companion
   script.register_on_entity_destroyed(entity)
 
-  companion:try_to_refuel()
+  --companion:try_to_refuel()
   companion:set_active()
 
 end
 
 function Companion:set_robot_stack()
   local inventory = self:get_inventory()
-  if not inventory.set_filter(21,"companion-construction-robot") then
-    inventory[21].clear()
-    inventory.set_filter(21,"companion-construction-robot")
+  if not inventory.set_filter(11,"companion-construction-robot") then
+    inventory[11].clear()
+    inventory.set_filter(11,"companion-construction-robot")
   end
 
   if self.can_construct then
-    inventory[21].set_stack({name = "companion-construction-robot", count = 100})
+    inventory[11].set_stack({name = "companion-construction-robot", count = 100})
   else
-    inventory[21].clear()
+    inventory[11].clear()
   end
 
 end
@@ -229,11 +230,11 @@ end
 
 function Companion:clear_robot_stack()
   local inventory = self:get_inventory()
-  if not inventory.set_filter(21,"companion-construction-robot") then
-    inventory[21].clear()
-    inventory.set_filter(21,"companion-construction-robot")
+  if not inventory.set_filter(11,"companion-construction-robot") then
+    inventory[11].clear()
+    inventory.set_filter(11,"companion-construction-robot")
   end
-  inventory[21].clear()
+  inventory[11].clear()
 end
 
 function Companion:set_active()
@@ -353,14 +354,14 @@ function Companion:check_equipment()
 
 
   self.can_attack = false
-
+--[[
   for k, equipment in pairs (grid.equipment) do
     if equipment.type == "active-defense-equipment" then
       self.can_attack = true
       break
     end
   end
-
+--]]
 end
 
 function Companion:robot_spawned(robot)
@@ -425,7 +426,7 @@ function Companion:try_to_refuel()
   if not self:get_fuel_inventory().is_empty() or self.entity.energy > 0 then
     return
   end
-
+--[[
   if self:distance(self.player.position) <= follow_range then
     for k, item in pairs (get_fuel_items()) do
       if self:find_and_take_from_player(item) then
@@ -433,16 +434,16 @@ function Companion:try_to_refuel()
       end
     end
   end
-
+--]]
   return true
 end
 
 function Companion:update_state_flags()
-  self.out_of_energy = self:try_to_refuel()
+  --self.out_of_energy = self:try_to_refuel()
   self.is_in_combat = (game.tick - self.last_attack_tick) < 60
   self.is_on_low_health = self.entity.get_health_ratio() < 0.5
   self.is_busy_for_construction = self.is_in_combat or self:move_to_robot_average() or self.moving_to_destination
-  self.is_getting_full = self:get_inventory()[16].valid_for_read
+  self.is_getting_full = self:get_inventory()[7].valid_for_read
 end
 
 function Companion:search_for_nearby_work()
@@ -450,8 +451,9 @@ function Companion:search_for_nearby_work()
   if not self.can_construct then return end
   local cell = self.entity.logistic_cell
   if not cell then return end
-  local range = cell.construction_radius + 16
-  local origin = self.entity.position
+  local range = cell.construction_radius + 4
+  --local origin = self.entity.position
+  local origin = self.player.position
   local area = {{origin.x - range, origin.y - range}, {origin.x + range, origin.y + range}}
   --self:say("NICE")
   self:try_to_find_work(area)
@@ -523,8 +525,8 @@ function Companion:on_destroyed()
 
   if not next(player_data.companions) then
     script_data.player_data[self.player.index] = nil
-    self.player.set_shortcut_available("companion-attack-toggle", false)
-    self.player.set_shortcut_toggled("companion-attack-toggle", false)
+    -- self.player.set_shortcut_available("companion-attack-toggle", false)
+    -- self.player.set_shortcut_toggled("companion-attack-toggle", false)
     self.player.set_shortcut_available("companion-construction-toggle", false)
     self.player.set_shortcut_toggled("companion-construction-toggle", false)
   end
@@ -547,7 +549,7 @@ end
 
 function Companion:get_fuel_inventory()
   local inventory = self.entity.get_fuel_inventory()
-  inventory.sort_and_merge()
+  --inventory.sort_and_merge()
   return inventory
 end
 
@@ -572,7 +574,7 @@ end
 function Companion:try_to_shove_inventory()
   local inventory = self:get_inventory()
   local total_inserted = 0
-  for k = 1, 20 do
+  for k = 1, 10 do
     local stack = inventory[k]
     if not (stack and stack.valid_for_read) then break end
     local inserted = self:insert_to_player_or_vehicle(stack)
@@ -638,7 +640,8 @@ function Companion:return_to_player()
     return
   end
 
-  self:set_speed(math.max(build_speed, get_player_speed(self.player, 1.2)))
+  self:set_speed(math.max(build_speed, get_player_speed(self.player, get_speed_boost(self.entity.burner))))
+  --self:set_speed(math.max(build_speed, get_player_speed(self.player, 1.2)))
 
   if self.player.character then
     self.entity.follow_target = self.player.character
@@ -779,7 +782,7 @@ function Companion:set_job_destination(position)
 end
 
 function Companion:player_wants_attack()
-  return self.player.is_shortcut_toggled("companion-attack-toggle")
+  return false --self.player.is_shortcut_toggled("companion-attack-toggle")
 end
 
 function Companion:player_wants_construction()
@@ -899,7 +902,7 @@ function Companion:try_to_find_work(search_area)
   local attempted_proxy_items = {}
   local repair_attempted = false
   local deconstruction_attempted = false
-  local max_item_type_count = 10
+  local max_item_type_count = 5
 
   for k, entity in pairs (entities) do
 
@@ -1095,8 +1098,8 @@ end
 
 local search_offsets = {}
 local search_refresh = nil
-local search_distance = 100
-local search_divisions = 7
+local search_distance = 12 -- too big distance
+local search_divisions = 3
 
 local setup_search_offsets = function()
   local r = search_distance / search_divisions
@@ -1155,7 +1158,7 @@ local perform_job_search = function(player, player_data)
 end
 
 local perform_attack_search = function(player, player_data)
-
+--[[
   if not player.is_shortcut_toggled("companion-attack-toggle") then return end
 
   local free_companion
@@ -1182,7 +1185,7 @@ local perform_attack_search = function(player, player_data)
 
   --player.surface.create_entity{name = "flying-text", position = search_area[1], text = player_data.last_attack_search_offset}
   --player.surface.create_entity{name = "flying-text", position = search_area[2], text = player_data.last_attack_search_offset}
-
+--]]
 end
 
 local process_specific_job_queue = function(player_index, player_data)
@@ -1525,10 +1528,10 @@ end
 local on_lua_shortcut = function(event)
   local player = game.get_player(event.player_index)
   local name = event.prototype_name
-  if name == "companion-attack-toggle" then
+  --[[ if name == "companion-attack-toggle" then
     player.set_shortcut_toggled(name, not player.is_shortcut_toggled(name))
     recall_fighting_robots(player)
-  end
+  end --]]
   if name == "companion-construction-toggle" then
     player.set_shortcut_toggled(name, not player.is_shortcut_toggled(name))
     recall_constructing_robots(player)
@@ -1618,6 +1621,7 @@ local on_pre_build = function(event)
 end
 
 local on_player_created = function(event)
+  --[[
   local player = game.get_player(event.player_index)
   if not player then return end
 
@@ -1634,12 +1638,13 @@ local on_player_created = function(event)
     entity.insert("coal")
     entity.color = player.color
     local grid = entity.grid
-    grid.put{name = "companion-reactor-equipment"}
-    grid.put{name = "companion-defense-equipment"}
-    grid.put{name = "companion-shield-equipment"}
+    -- grid.put{name = "companion-reactor-equipment"}
+    -- grid.put{name = "companion-defense-equipment"}
+    -- grid.put{name = "companion-shield-equipment"}
     grid.put{name = "companion-roboport-equipment"}
     local companion = Companion.new(entity, player)
   end
+  --]]
 end
 
 local lib = {}
@@ -1704,10 +1709,10 @@ lib.on_configuration_changed = function()
         gui.companion_gui.destroy()
       end
 
-      if not player.is_shortcut_available("companion-attack-toggle") then
+      --[[ if not player.is_shortcut_available("companion-attack-toggle") then
         player.set_shortcut_available("companion-attack-toggle", true)
         player.set_shortcut_toggled("companion-attack-toggle", true)
-      end
+      end --]]
 
       if not player.is_shortcut_available("companion-construction-toggle") then
         player.set_shortcut_available("companion-construction-toggle", true)
